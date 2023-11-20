@@ -1,21 +1,28 @@
 import catchAsyncError from "../middlewares/catchAsyncError.js";
-import  Course  from "../models/Course.js";
+import Course from "../models/Course.js";
 import getDataUri from "../utils/dataUri.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import cloudinary from "cloudinary";
-import  Stats from "../models/Stats.js";
+import Stats from "../models/Stats.js";
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
 
 export const getAllCourses = catchAsyncError(async (req, res, next) => {
-  const keyword = req.query.keyword || "";
-  const category = req.query.category || "";
+  let keyword = req.query.keyword || "";
+  let category = req.query.category || "";
+
+  keyword = escapeRegExp(keyword);
+  category = escapeRegExp(category);
 
   const courses = await Course.find({
     title: {
-      $regex: keyword,
+      $regex: new RegExp(keyword),
       $options: "i",
     },
     category: {
-      $regex: category,
+      $regex: new RegExp(category),
       $options: "i",
     },
   }).select("-lectures");

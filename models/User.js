@@ -53,7 +53,6 @@ const schema = new mongoose.Schema({
       poster: String,
     },
   ],
-
   createdAt: {
     type: Date,
     default: Date.now,
@@ -62,7 +61,6 @@ const schema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: String,
 });
-
 
 schema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

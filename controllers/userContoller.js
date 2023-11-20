@@ -272,27 +272,27 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
   // Cancel Subscription
-   const subscriptionId = user.subscription.id;
-   let refund = false;
+  const subscriptionId = user.subscription.id;
+  let refund = false;
 
-   await instance.subscriptions.cancel(subscriptionId);
+  await instance.subscriptions.cancel(subscriptionId);
 
-   const payment = await Payment.findOne({
-     razorpay_subscription_id: subscriptionId,
-   });
+  const payment = await Payment.findOne({
+    razorpay_subscription_id: subscriptionId,
+  });
 
-   const gap = Date.now() - payment.createdAt;
+  const gap = Date.now() - payment.createdAt;
 
-   const refundTime = process.env.REFUND_DAYS * 24 * 60 * 60 * 1000;
+  const refundTime = process.env.REFUND_DAYS * 24 * 60 * 60 * 1000;
 
-   if (refundTime > gap) {
-     await instance.payments.refund(payment.razorpay_payment_id);
-     refund = true;
-   }
+  if (refundTime > gap) {
+    await instance.payments.refund(payment.razorpay_payment_id);
+    refund = true;
+  }
 
-   await payment.deleteOne();
+  await payment.remove();
 
-  await user.deleteOne();
+  await user.remove();
 
   res.status(200).json({
     success: true,
@@ -325,8 +325,8 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
     refund = true;
   }
 
-  await payment.deleteOne();  
-  await user.deleteOne();
+  await payment.remove();
+  await user.remove();
 
   res
     .status(200)
